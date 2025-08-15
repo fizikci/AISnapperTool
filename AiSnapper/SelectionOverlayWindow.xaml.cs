@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,7 +19,14 @@ namespace AiSnapper
         public SelectionOverlayWindow()
         {
             InitializeComponent();
-            WindowState = WindowState.Maximized;
+            
+            // Set window to cover all screens (virtual screen bounds)
+            Left = SystemParameters.VirtualScreenLeft;
+            Top = SystemParameters.VirtualScreenTop;
+            Width = SystemParameters.VirtualScreenWidth;
+            Height = SystemParameters.VirtualScreenHeight;
+            WindowState = WindowState.Normal; // Don't use Maximized as it only covers primary screen
+            
             MouseDown += OnMouseDown;
             MouseMove += OnMouseMove;
             MouseUp += OnMouseUp;
@@ -37,7 +45,7 @@ namespace AiSnapper
             SelectionRect.Height = 0;
         }
 
-        private void OnMouseMove(object sender, MouseEventArgs e)
+        private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (!_dragging) return;
             var pos = e.GetPosition(this);
@@ -59,6 +67,10 @@ namespace AiSnapper
             var y = Canvas.GetTop(SelectionRect);
             var w = SelectionRect.Width;
             var h = SelectionRect.Height;
+
+            Console.WriteLine($"Selection: x={x}, y={y}, w={w}, h={h}");
+            Debug.WriteLine($"Selection: x={x}, y={y}, w={w}, h={h}");
+
             if (w > 5 && h > 5)
             {
                 SelectedRect = new Rect(x, y, w, h);

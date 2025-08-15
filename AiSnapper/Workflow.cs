@@ -20,8 +20,10 @@ namespace AiSnapper
             if (overlay.SelectedRect.HasValue)
             {
                 var r = overlay.SelectedRect.Value;
-                captureRect = new Rectangle((int)r.X + (int)SystemParameters.VirtualScreenLeft,
-                                            (int)r.Y + (int)SystemParameters.VirtualScreenTop,
+                // Convert overlay coordinates to screen coordinates
+                // Since the overlay window covers the virtual screen, we need to add the virtual screen offset
+                captureRect = new Rectangle((int)(r.X),
+                                            (int)(r.Y),
                                             (int)r.Width, (int)r.Height);
             }
             else

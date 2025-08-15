@@ -27,7 +27,7 @@ namespace AiSnapper
             PromptText = PromptBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(PromptText))
             {
-                MessageBox.Show("Please enter a prompt.", "AiSnapper", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("Please enter a prompt.", "AiSnapper", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             DialogResult = true;

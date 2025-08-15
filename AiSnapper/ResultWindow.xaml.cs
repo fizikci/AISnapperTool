@@ -12,7 +12,7 @@ namespace AiSnapper
 
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
-            Clipboard.SetText(OutputBox.Text);
+            System.Windows.Clipboard.SetText(OutputBox.Text);
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
