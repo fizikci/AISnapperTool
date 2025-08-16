@@ -53,5 +53,36 @@ namespace AiSnapper
             var text = root.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
             return text ?? "";
         }
+
+        // New: Multi-turn chat support. Pass the entire messages array as-is.
+        public static async Task<string> AskAsync(object[] messages, string? modelOverride = null)
+        {
+            var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+            if (string.IsNullOrEmpty(apiKey))
+                throw new InvalidOperationException("OPENAI_API_KEY environment variable is not set.");
+
+            var model = modelOverride ?? Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? DefaultModel;
+            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+            var payload = new
+            {
+                model = model,
+                messages = messages,
+                temperature = 0.2
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var res = await _http.PostAsync(ApiUrl, new StringContent(json, Encoding.UTF8, "application/json"));
+            var body = await res.Content.ReadAsStringAsync();
+            if (!res.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException($"OpenAI error {res.StatusCode}: {body}");
+            }
+
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+            var text = root.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+            return text ?? "";
+        }
     }
 }

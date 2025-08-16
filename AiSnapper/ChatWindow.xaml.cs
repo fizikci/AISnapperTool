@@ -20,6 +20,7 @@ namespace AiSnapper
     {
         private readonly byte[] _png;
         private readonly ObservableCollection<ChatItem> _items = new();
+        private readonly System.Collections.Generic.List<object> _messages = new();
         private DateTime _lastMouseMove = DateTime.UtcNow;
 
         public ChatWindow(byte[] png)
@@ -34,6 +35,12 @@ namespace AiSnapper
             img.CacheOption = BitmapCacheOption.OnLoad;
             img.EndInit();
             PreviewImage.Source = img;
+
+            // Add a system prompt for better responses about the provided image
+            _messages.Add(new {
+                role = "system",
+                content = new object[] { new { type = "text", text = "You are a helpful assistant. When answering, be concise and reference the attached image when relevant." } }
+            });
         }
 
         private async void Send_Click(object sender, RoutedEventArgs e)
@@ -48,16 +55,39 @@ namespace AiSnapper
 
             _items.Add(new ChatItem { IsUser = true, Text = prompt });
             PromptBox.Text = string.Empty;
+
+            // Add user message. First user message should include the image; subsequent ones can be text-only.
+            if (!_messages.Any(m => (string)m.GetType().GetProperty("role")!.GetValue(m)! == "user"))
+            {
+                _messages.Add(new {
+                    role = "user",
+                    content = new object[] {
+                        new { type = "text", text = prompt },
+                        new { type = "image_url", image_url = new { url = $"data:image/png;base64,{Convert.ToBase64String(_png)}", detail = "high" } }
+                    }
+                });
+            }
+            else
+            {
+                _messages.Add(new {
+                    role = "user",
+                    content = new object[] { new { type = "text", text = prompt } }
+                });
+            }
+
             ShowSpinner(true);
             await Task.Yield();
             ChatScroll.ScrollToEnd();
 
             try
             {
-                var b64 = Convert.ToBase64String(_png);
-                var reply = await OpenAIClient.AskAsync(prompt, b64);
+                var reply = await OpenAIClient.AskAsync(_messages.ToArray());
                 ShowSpinner(false);
                 _items.Add(new ChatItem { IsUser = false, Text = reply });
+                _messages.Add(new {
+                    role = "assistant",
+                    content = new object[] { new { type = "text", text = reply } }
+                });
                 await Task.Yield();
                 ChatScroll.ScrollToEnd();
             }
@@ -81,7 +111,6 @@ namespace AiSnapper
                 e.Handled = true;
                 await SendCurrentAsync();
             }
-            // Shift+Enter inserts newline (default behavior allowed)
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
