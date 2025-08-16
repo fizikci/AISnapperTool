@@ -19,20 +19,35 @@
             <!-- Custom header (drag region) -->
             <Border x:Name="HeaderBar" Grid.Row="0" Background="#202028" Height="44" MouseLeftButtonDown="Header_MouseLeftButtonDown" Opacity="1">
                 <DockPanel>
-                    <TextBlock Text="AiSnapper Chat" Foreground="#FFFFFF" FontSize="15" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    <!-- Close button docked right: place before title so the title fills remaining space -->
                     <Button Content="✕" Width="34" Height="28" Margin="0,0,8,0" DockPanel.Dock="Right" Click="Close_Click"
                             Background="Transparent" Foreground="#B8C1CC" BorderBrush="Transparent"/>
+                    <TextBlock Text="AiSnapper Chat" Foreground="#FFFFFF" FontSize="15" VerticalAlignment="Center" Margin="12,0,0,0"/>
                 </DockPanel>
             </Border>
 
             <!-- Image Preview card -->
             <Border Grid.Row="1" Margin="14,12,14,10" Background="#23232A" CornerRadius="12" Padding="10">
-                <StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
                     <TextBlock Text="Selected Image" Foreground="#B8C1CC" Margin="0,0,0,6"/>
-                    <Grid Height="260" ClipToBounds="True">
-                        <Image x:Name="PreviewImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                    <!-- Preview container with plus icon overlay -->
+                    <Grid Grid.Row="1" Height="260" ClipToBounds="True">
+                        <Image x:Name="PreviewImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                        <Border x:Name="AddCapture" Background="#2B2F36" CornerRadius="8" BorderBrush="#3A3F48" BorderThickness="1" Cursor="Hand"
+                                HorizontalAlignment="Center" VerticalAlignment="Center" Width="140" Height="140" MouseLeftButtonUp="AddCapture_Click">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="+" FontSize="56" Foreground="#B8C1CC" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Capture" FontSize="14" Foreground="#B8C1CC" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
                     </Grid>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Conversation -->
@@ -89,7 +104,7 @@
                         <Grid>
                             <TextBox x:Name="PromptBox" MinHeight="140" MaxHeight="260" TextWrapping="Wrap" AcceptsReturn="True"
                                      VerticalScrollBarVisibility="Auto" Background="Transparent" Foreground="#FFFFFF" BorderThickness="0"
-                                     FontSize="14" Padding="14" KeyDown="PromptBox_KeyDown"/>
+                                     FontSize="14" Padding="14" PreviewKeyDown="PromptBox_PreviewKeyDown"/>
                             <TextBlock Text="Ask anything about the screenshot..." Margin="18,14,54,0" Foreground="#B8C1CC"
                                        IsHitTestVisible="False" VerticalAlignment="Top">
                                 <TextBlock.Style>
