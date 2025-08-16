@@ -73,13 +73,19 @@ namespace AiSnapper
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             _hotkey = new HotkeyManager(hwnd);
-            // Ctrl + Alt + I
+            // Ctrl + Alt + C => capture
             _hotkey.Register(Modifiers.MOD_CONTROL | Modifiers.MOD_ALT, VirtualKeys.C, OnCapture);
-            _hotkey.Register(Modifiers.MOD_CONTROL | Modifiers.MOD_ALT, VirtualKeys.I, OnCapture);
+            // Ctrl + Alt + I => quick edit selected text
+            _hotkey.Register(Modifiers.MOD_CONTROL | Modifiers.MOD_ALT, VirtualKeys.I, OnQuickEdit);
         }
         private async void OnCapture()
         {
             AddCapture_Click(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left));
+        }
+
+        private async void OnQuickEdit()
+        {
+            await QuickEditWindow.ShowForSelectionAsync();
         }
 
         protected override void OnSourceInitialized(EventArgs e)

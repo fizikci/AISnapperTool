@@ -1,0 +1,34 @@
+<Window x:Class="AiSnapper.QuickEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Quick Edit" Width="560" Height="360" WindowStyle="SingleBorderWindow" ResizeMode="NoResize"
+        ShowInTaskbar="False" Background="#1F1F23"
+        WindowStartupLocation="Manual" KeyDown="Window_KeyDown">
+    <Border CornerRadius="10" Background="#2B2F36" Padding="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ScrollViewer Grid.Row="0" Margin="0,0,0,8">
+                <TextBox x:Name="Editor" TextWrapping="Wrap" AcceptsReturn="True" Background="#23232A" Foreground="White"
+                         BorderThickness="0" Padding="10" FontSize="14" MinHeight="180"/>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Margin" Value="0,0,6,0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <Button Content="Expand" Click="Expand_Click"/>
+                <Button Content="Summarize" Click="Summarize_Click"/>
+                <Button Content="Rephrase (Professional)" Click="RephrasePro_Click"/>
+                <Button Content="Rephrase (Casual)" Click="RephraseCasual_Click"/>
+                <Button Content="Accept" Background="#2D6AE3" Foreground="White" Click="Accept_Click"/>
+                <Button Content="Cancel" Click="Cancel_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
