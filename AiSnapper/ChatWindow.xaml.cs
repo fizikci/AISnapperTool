@@ -88,6 +88,35 @@ namespace AiSnapper
             AddCapture.Visibility = Visibility.Collapsed;
         }
 
+        // Context menu: copy the displayed image to clipboard
+        private void CopyImage_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (PreviewImage.Source is BitmapSource bmp)
+                {
+                    System.Windows.Clipboard.SetImage(bmp);
+                }
+            }
+            catch { }
+        }
+
+        // Context menu: start a new capture (same as clicking +)
+        private async void NewCapture_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            try
+            {
+                await Task.Delay(100);
+                await CaptureSelectionAsync();
+            }
+            finally
+            {
+                Show();
+                Activate();
+            }
+        }
+
         private Task<bool> CaptureSelectionAsync()
         {
             // Show overlay to pick region
