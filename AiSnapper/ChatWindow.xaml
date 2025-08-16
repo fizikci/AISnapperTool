@@ -1,0 +1,121 @@
+<Window x:Class="AiSnapper.ChatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AiSnapper Chat" Width="920" Height="760" WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="CanResizeWithGrip" AllowsTransparency="True" Background="Transparent"
+        MouseMove="Window_MouseMove">
+    <Border CornerRadius="16" Background="#1B1B1F" SnapsToDevicePixels="True" ClipToBounds="True">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="0" Opacity="0.45"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Custom header (drag region) -->
+            <Border x:Name="HeaderBar" Grid.Row="0" Background="#202028" Height="44" MouseLeftButtonDown="Header_MouseLeftButtonDown" Opacity="1">
+                <DockPanel>
+                    <TextBlock Text="AiSnapper Chat" Foreground="#FFFFFF" FontSize="15" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    <Button Content="✕" Width="34" Height="28" Margin="0,0,8,0" DockPanel.Dock="Right" Click="Close_Click"
+                            Background="Transparent" Foreground="#B8C1CC" BorderBrush="Transparent"/>
+                </DockPanel>
+            </Border>
+
+            <!-- Image Preview card -->
+            <Border Grid.Row="1" Margin="14,12,14,10" Background="#23232A" CornerRadius="12" Padding="10">
+                <StackPanel>
+                    <TextBlock Text="Selected Image" Foreground="#B8C1CC" Margin="0,0,0,6"/>
+                    <Grid Height="260" ClipToBounds="True">
+                        <Image x:Name="PreviewImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Conversation -->
+            <Border Grid.Row="2" Margin="14,0,14,10" Background="#23232A" CornerRadius="12" Padding="6">
+                <ScrollViewer x:Name="ChatScroll" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <ItemsControl x:Name="ChatList">
+                            <ItemsControl.ItemTemplate>
+                                <!-- Chat item template (kept inline for clarity) -->
+                                <DataTemplate>
+                                    <Border x:Name="Bubble" CornerRadius="14" Padding="12" Margin="8,6" Background="#2A2F36">
+                                        <TextBlock TextWrapping="Wrap" Foreground="#FFFFFF" FontSize="14" Text="{Binding Text}"/>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                            <Setter TargetName="Bubble" Property="Background" Value="#2D6AE3"/>
+                                            <Setter TargetName="Bubble" Property="HorizontalAlignment" Value="Right"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsUser}" Value="False">
+                                            <Setter TargetName="Bubble" Property="Background" Value="#2A2F36"/>
+                                            <Setter TargetName="Bubble" Property="HorizontalAlignment" Value="Left"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+
+                        <!-- Typing spinner bubble -->
+                        <Border x:Name="TypingBubble" CornerRadius="14" Padding="10" Margin="8,6" Background="#2A2F36" HorizontalAlignment="Left" Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ProgressBar IsIndeterminate="True" Width="80" Height="6" Foreground="#9BB4FF" Background="#3A3F48"/>
+                                <TextBlock Text=" Thinking..." Foreground="#B8C1CC" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Input area -->
+            <Border Grid.Row="3" Margin="14,0,14,16" Background="#23232A" CornerRadius="16" Padding="12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Rounded input shell -->
+                    <Border x:Name="InputShell" CornerRadius="12" Background="#2B2F36" BorderBrush="#3A3F48" BorderThickness="1" Padding="0" Margin="0,0,8,0">
+                        <Grid>
+                            <TextBox x:Name="PromptBox" MinHeight="140" MaxHeight="260" TextWrapping="Wrap" AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto" Background="Transparent" Foreground="#FFFFFF" BorderThickness="0"
+                                     FontSize="14" Padding="14" KeyDown="PromptBox_KeyDown"/>
+                            <TextBlock Text="Ask anything about the screenshot..." Margin="18,14,54,0" Foreground="#B8C1CC"
+                                       IsHitTestVisible="False" VerticalAlignment="Top">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=PromptBox}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <!-- Send button -->
+                    <Button Grid.Column="1" x:Name="SendButton" Width="44" Height="44" Margin="0" VerticalAlignment="Top" Click="Send_Click"
+                            Background="#2D6AE3" BorderBrush="Transparent" Foreground="White" ToolTip="Send (Enter)">
+                        <TextBlock Text="➤" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Resize grip -->
+            <ResizeGrip Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="6" Width="16" Height="16" Foreground="#666"/>
+        </Grid>
+    </Border>
+</Window>

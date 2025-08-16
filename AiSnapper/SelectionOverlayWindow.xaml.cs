@@ -15,6 +15,8 @@ namespace AiSnapper
         private bool _dragging;
 
         public Rect? SelectedRect { get; private set; }
+        // New: selection rectangle in device pixels, relative to the virtual screen origin
+        public System.Drawing.Rectangle? SelectedRectPx { get; private set; }
 
         public SelectionOverlayWindow()
         {
@@ -31,7 +33,7 @@ namespace AiSnapper
             MouseMove += OnMouseMove;
             MouseUp += OnMouseUp;
             KeyDown += (s, e) => { if (e.Key == Key.Escape) { DialogResult = false; Close(); } };
-            MouseRightButtonUp += (s, e) => { SelectedRect = null; DialogResult = true; Close(); }; // full screen shortcut
+            MouseRightButtonUp += (s, e) => { SelectedRect = null; SelectedRectPx = null; DialogResult = true; Close(); }; // full screen shortcut
         }
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
@@ -74,6 +76,20 @@ namespace AiSnapper
             if (w > 5 && h > 5)
             {
                 SelectedRect = new Rect(x, y, w, h);
+
+                // Compute device-pixel coordinates using PointToScreen for both corners (robust across mixed-DPI)
+                var topLeft = new System.Windows.Point(x, y);
+                var bottomRight = new System.Windows.Point(x + w, y + h);
+                var tlScreen = PointToScreen(topLeft);
+                var brScreen = PointToScreen(bottomRight);
+
+                var pxX = (int)Math.Round(Math.Min(tlScreen.X, brScreen.X));
+                var pxY = (int)Math.Round(Math.Min(tlScreen.Y, brScreen.Y));
+                var pxW = (int)Math.Round(Math.Abs(brScreen.X - tlScreen.X));
+                var pxH = (int)Math.Round(Math.Abs(brScreen.Y - tlScreen.Y));
+
+                SelectedRectPx = new System.Drawing.Rectangle(pxX, pxY, pxW, pxH);
+
                 DialogResult = true;
                 Close();
             }

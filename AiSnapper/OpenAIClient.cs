@@ -11,6 +11,7 @@ namespace AiSnapper
     {
         private static readonly HttpClient _http = new HttpClient();
         private const string ApiUrl = "https://api.openai.com/v1/chat/completions"; // vision via content parts
+        private const string DefaultModel = "gpt-4o"; // best general vision model
 
         public static async Task<string> AskAsync(string prompt, string base64Png)
         {
@@ -18,19 +19,21 @@ namespace AiSnapper
             if (string.IsNullOrEmpty(apiKey))
                 throw new InvalidOperationException("OPENAI_API_KEY environment variable is not set.");
 
+            var model = Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? DefaultModel;
+
             _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-            // Build a vision message: text + image_url (data URI)
+            // Build a vision message: text + image_url (data URI). image_url must be an object with url/detail.
             var payload = new
             {
-                model = "gpt-4o-mini",
+                model = model,
                 messages = new object[]
                 {
                     new {
                         role = "user",
                         content = new object[] {
                             new { type = "text", text = prompt },
-                            new { type = "image_url", image_url = $"data:image/png;base64,{base64Png}" }
+                            new { type = "image_url", image_url = new { url = $"data:image/png;base64,{base64Png}", detail = "high" } }
                         }
                     }
                 },

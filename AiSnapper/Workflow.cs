@@ -9,19 +9,23 @@ namespace AiSnapper
 {
     public static class Workflow
     {
-        public static async Task SelectRegionThenPromptAsync()
+        public static Task SelectRegionThenPromptAsync()
         {
             // Overlay to pick region
             var overlay = new SelectionOverlayWindow();
             var ok = overlay.ShowDialog();
-            if (ok != true) return;
+            if (ok != true) return Task.CompletedTask;
 
             Rectangle captureRect;
-            if (overlay.SelectedRect.HasValue)
+            if (overlay.SelectedRectPx.HasValue)
             {
+                // Use device-pixel rectangle computed by the overlay
+                captureRect = overlay.SelectedRectPx.Value;
+            }
+            else if (overlay.SelectedRect.HasValue)
+            {
+                // Legacy fallback path (should rarely be used now)
                 var r = overlay.SelectedRect.Value;
-                // Convert overlay coordinates to screen coordinates
-                // Since the overlay window covers the virtual screen, we need to add the virtual screen offset
                 captureRect = new Rectangle((int)(r.X + SystemParameters.VirtualScreenLeft),
                                             (int)(r.Y + SystemParameters.VirtualScreenTop),
                                             (int)r.Width, (int)r.Height);
@@ -31,17 +35,28 @@ namespace AiSnapper
                 captureRect = ScreenUtils.VirtualScreenRect();
             }
 
-            await RunPromptFlowAsync(captureRect);
+            // Capture entire virtual screen first, then crop selection for robustness
+            var png = ScreenUtils.CaptureVirtualThenCropToPng(captureRect);
+
+            // Open modern chat window with preview
+            var chat = new ChatWindow(png);
+            chat.ShowDialog();
+            return Task.CompletedTask;
         }
 
-        public static async Task FullScreenThenPromptAsync()
+        public static Task FullScreenThenPromptAsync()
         {
-            await RunPromptFlowAsync(ScreenUtils.VirtualScreenRect());
+            // Capture full virtual screen
+            var png = ScreenUtils.CaptureVirtualThenCropToPng(ScreenUtils.VirtualScreenRect());
+            var chat = new ChatWindow(png);
+            chat.ShowDialog();
+            return Task.CompletedTask;
         }
 
         private static async Task RunPromptFlowAsync(Rectangle rect)
         {
-            var png = ScreenUtils.CaptureToPng(rect);
+            // Legacy path no longer used; retained for compatibility
+            var png = ScreenUtils.CaptureVirtualThenCropToPng(rect);
             var preview = new PreviewDialog(png);
             var ok = preview.ShowDialog();
             if (ok != true) return;
