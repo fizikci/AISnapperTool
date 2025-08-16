@@ -9,5 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
+    <PackageReference Include="MdXaml" Version="1.26.0" />
   </ItemGroup>
 </Project>

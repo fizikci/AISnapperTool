@@ -1,6 +1,7 @@
 <Window x:Class="AiSnapper.ChatWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:md="clr-namespace:MdXaml;assembly=MdXaml"
         Title="AiSnapper Chat" Width="920" Height="760" WindowStartupLocation="CenterScreen"
         WindowStyle="None" ResizeMode="CanResizeWithGrip" Background="#78bb7b"
         MouseMove="Window_MouseMove">
@@ -70,10 +71,10 @@
                                 <!-- Chat item template (kept inline for clarity) -->
                                 <DataTemplate>
                                     <Border x:Name="Bubble" CornerRadius="14" Padding="12" Margin="8,6" Background="#2A2F36">
-                                        <!-- Replaced TextBlock with a read-only TextBox for selectable/copyable text -->
-                                        <TextBox Text="{Binding Text}" IsReadOnly="True" BorderThickness="0" Background="Transparent" Foreground="#FFFFFF"
-                                                 FontSize="14" TextWrapping="Wrap" Padding="0" AcceptsReturn="True" FocusVisualStyle="{x:Null}"
-                                                 IsReadOnlyCaretVisible="False"/>
+                                        <!-- Render markdown; disable inner scrollbars so the parent ScrollViewer handles scrolling -->
+                                        <md:MarkdownScrollViewer Markdown="{Binding Text}" Background="Transparent" Foreground="#FFFFFF"
+                                                                BorderThickness="0" Padding="0"
+                                                                VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled"/>
                                     </Border>
                                     <DataTemplate.Triggers>
                                         <DataTrigger Binding="{Binding IsUser}" Value="True">
