@@ -44,6 +44,7 @@ namespace AiSnapper
         private readonly System.Collections.Generic.List<object> _messages = new();
         private DateTime _lastMouseMove = DateTime.UtcNow;
         private CancellationTokenSource? _cts;
+        private HotkeyManager? _hotkey;
 
         // Added: parameterless constructor required by WPF XAML loader (used by StartupUri)
         public ChatWindow() : this(null) { }
@@ -64,6 +65,21 @@ namespace AiSnapper
                 role = "system",
                 content = new object[] { new { type = "text", text = "You are a helpful assistant. When answering, be concise and reference the attached image when relevant." } }
             });
+            Loaded += MainWindow_Loaded;
+            Closed += (_, __) => _hotkey?.Dispose();
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            _hotkey = new HotkeyManager(hwnd);
+            // Ctrl + Alt + I
+            _hotkey.Register(Modifiers.MOD_CONTROL | Modifiers.MOD_ALT, VirtualKeys.C, OnCapture);
+            _hotkey.Register(Modifiers.MOD_CONTROL | Modifiers.MOD_ALT, VirtualKeys.I, OnCapture);
+        }
+        private async void OnCapture()
+        {
+            AddCapture_Click(this, new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left));
         }
 
         protected override void OnSourceInitialized(EventArgs e)

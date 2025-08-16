@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using System.Collections.Generic;
 
 namespace AiSnapper
 {
@@ -16,6 +17,7 @@ namespace AiSnapper
 
     public enum VirtualKeys : uint
     {
+        C = 0x43,
         I = 0x49
     }
 
@@ -23,8 +25,8 @@ namespace AiSnapper
     {
         private readonly IntPtr _hwnd;
         private int _idCounter = 1;
-        private int _currentId = 0;
-        private Action? _callback;
+        // Track callbacks per registered hotkey id
+        private readonly Dictionary<int, Action> _callbacks = new();
         private HwndSource _source;
 
         public HotkeyManager(IntPtr hwnd)
@@ -36,27 +38,36 @@ namespace AiSnapper
 
         public void Register(Modifiers mods, VirtualKeys key, Action callback)
         {
-            _callback = callback;
-            _currentId = _idCounter++;
-            if (!RegisterHotKey(_hwnd, _currentId, (uint)mods, (uint)key))
+            var id = _idCounter++;
+            if (!RegisterHotKey(_hwnd, id, (uint)mods, (uint)key))
             {
                 throw new InvalidOperationException("Failed to register hotkey. Try running as admin or change the combination.");
             }
+            _callbacks[id] = callback;
         }
 
         public void Dispose()
         {
-            if (_currentId != 0) UnregisterHotKey(_hwnd, _currentId);
+            // Unregister all hotkeys we registered
+            foreach (var id in new List<int>(_callbacks.Keys))
+            {
+                UnregisterHotKey(_hwnd, id);
+            }
+            _callbacks.Clear();
             _source.RemoveHook(WndProc);
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             const int WM_HOTKEY = 0x0312;
-            if (msg == WM_HOTKEY && wParam.ToInt32() == _currentId)
+            if (msg == WM_HOTKEY)
             {
-                _callback?.Invoke();
-                handled = true;
+                var id = wParam.ToInt32();
+                if (_callbacks.TryGetValue(id, out var cb))
+                {
+                    cb?.Invoke();
+                    handled = true;
+                }
             }
             return IntPtr.Zero;
         }
