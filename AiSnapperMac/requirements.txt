@@ -1,0 +1,10 @@
+PyQt6==6.7.0
+qasync==0.27.1
+requests==2.32.3
+Pillow==10.4.0
+mss==9.0.1
+pynput==1.7.7
+pyobjc-core==10.3.1; sys_platform == 'darwin'
+pyobjc-framework-AppKit==10.3.1; sys_platform == 'darwin'
+pyobjc-framework-Quartz==10.3.1; sys_platform == 'darwin'
+pyperclip==1.9.0

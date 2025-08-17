@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.*
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Caches & tooling
+.cache/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+.pdm.toml
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Type checkers
+.pyre/
+.pytype/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
